@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form id="form-register">
+        <label for="make">Marca</label>
+        <input type="text" name="make" id="make" required />
+
+        <label for="model">Modelo</label>
+        <input type="text" name="model" id="model" required />
+
+        <label for="plate">Placa</label>
+        <input type="text" name="plate" id="plate" required />
+
+        <label for="description">Descripción</label>
+        <input type="text" name="description" id="description" required />
+
+        <label for="type">tipo</label>
+        <input type="text" name="type" id="type" required />
+
+        <input type="submit" id="submit" title="confirmar">
+        
+
+    </form>
+   
+    <script>
+        const form = document.querySelector("form");
+        const submit = document.getElementById("submit");
+        submit.addEventListener("click", sendData);
+
+        const make = document.querySelector("make");
+        const model = document.querySelector("model");
+        const plate = document.querySelector("plate");
+        const description = document.querySelector("description");
+        const type = document.querySelector("type");
+
+        async function sendData(e) {
+            e.preventDefault();
+            const vehicleData = {};
+            vehicleData.make = form.make.value;
+            vehicleData.model = form.model.value;
+            vehicleData.plate = form.plate.value;
+            vehicleData.description = form.description.value;
+            vehicleData.type = form.type.value;
+
+            const res = await fetch("/vehicle/create", {
+                method: "POST",
+                body: JSON.stringify(vehicleData),
+                headers: { "Content-Type": "application/json" },
+            });
+           if(res.status==200){
+            console.log("OBJETO CREADO");
+           }
+        }
+    </script>
+</body>
+
+</html>
