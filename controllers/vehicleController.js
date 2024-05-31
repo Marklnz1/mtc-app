@@ -1,11 +1,19 @@
 const VehicleSchema = require("../models/Vehicle");
 const { getModelByTenant } = require("../utils/tenant");
-module.exports.vehicle_get = async (req, res, next) => {
+// module.exports.vehicle_get = async (req, res, next) => {
 
-  res.render("index.html");
+//   res.render("index.html");
 
-};
-
+// };
+// module.exports.vehicle_remove = async (req, res, next) => {
+//   let user = res.locals.user;
+//   const academyId= user.academyId??"6654558ffee910176819a803";
+//   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
+//   const vehicleData = req.body;
+//   const newVehicle = new Vehicle(vehicleData);
+//   await newVehicle.save();
+//   res.status(200).end();
+// };
 module.exports.vehicle_create = async (req, res, next) => {
   let user = res.locals.user;
   // if (user.academyId == null) {
@@ -13,7 +21,7 @@ module.exports.vehicle_create = async (req, res, next) => {
 
   //   return;
   // }
-  const academyId= user.academyId;
+  const academyId= user.academyId??"6654558ffee910176819a803";
 // console.log("entre Xd"+req.body);
   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
   const vehicleData = req.body;
@@ -24,7 +32,7 @@ module.exports.vehicle_create = async (req, res, next) => {
 module.exports.vehicle_list_get = async (req, res, next) => {
   let user = res.locals.user;
 
-  const academyId= user.academyId;
+  const academyId= user.academyId??"6654558ffee910176819a803";
   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
   const vehicles =  await Vehicle.find().lean()
   .exec();

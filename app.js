@@ -9,6 +9,9 @@ const adminController = require('./controllers/adminController');
 const extractUser = require('./middleware/extractUser');
 
 const vehicleController = require('./controllers/vehicleController');
+const clientController = require('./controllers/clientController');
+const scheduleController = require('./controllers/scheduleController');
+const transactionController = require('./controllers/transactionController');
 
 const PORT = process.env.PORT;
 // let dbURI = process.env.MONGODB_URL;
@@ -54,8 +57,20 @@ app.post("/admin/user/remove",adminController.remove_academy_user);
 app.get("/admin/academy/list",adminController.list_academy);
 app.post("/admin/academy",adminController.get_academy);
 
-// app.get("/vehicle/create",vehicleController.vehicle_get);
 app.post("/vehicle/create",vehicleController.vehicle_create);
 app.get("/vehicle/list",vehicleController.vehicle_list_get);
 
-console.log("Servidor encendido en http://localhost:"+PORT+" wtf "+process.env.MONGODB_URL+" a");
+app.post("/client/create",clientController.client_create);
+app.get("/client/list",clientController.client_list_get);
+app.post("/client/schedules/get",clientController.schedule_list_get);
+app.post("/client/schedules/remove",clientController.schedule_list_remove);
+
+app.post("/client",clientController.client_get);
+
+app.post("/schedule/list",scheduleController.schedule_list_create);
+// app.get("/schedule/list",scheduleController.schedule_list_get);
+app.post("/debt/create",transactionController.debt_create);
+app.post("/payment/create",transactionController.payment_create);
+app.get("/payment/list/get",transactionController.payment_list);
+
+console.log("Servidor encendido en http://localhost:"+PORT);
