@@ -29,6 +29,9 @@ module.exports.schedule_vehicle_list = async (req, res, next) => {
   const schedules = await Schedule.find({ date });
   const idsExcluidos = [];
   for(const s of schedules){
+    if(s.vehicleId=="Alquilar"){
+      continue;
+    }
     idsExcluidos.push(s.vehicleId);
   }
   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
