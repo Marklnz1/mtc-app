@@ -61,7 +61,7 @@ module.exports.client_list_get = async (req, res, next) => {
       const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
 
       for(const c of clients){
-        c.vehicle = (await Schedule.findOne({date,clientId:c._id}).lean().exec()).vehicleId;
+        c.vehicle = (await Schedule.findOne({date,clientId:c._id}).lean().exec())?.vehicleId;
       }
     }
    
