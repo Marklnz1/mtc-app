@@ -1,4 +1,7 @@
 const ScheduleSchema = require("../models/Schedule");
+const VehicleSchema = require("../models/Vehicle");
+const ClientSchema = require("../models/Client");
+
 const { getModelByTenant } = require("../utils/tenant");
 
 // module.exports.vehicle_remove = async (req, res, next) => {
@@ -10,8 +13,55 @@ const { getModelByTenant } = require("../utils/tenant");
 //   await newVehicle.save();
 //   res.status(200).end();
 // };
+module.exports.schedule_vehicle_list = async (req, res, next) => {
+  console.log("ENTRANDO " + req.body);
+  let user = res.locals.user;
+  // if (user.academyId == null) {
+  //   res.status(400).end();
+
+  //   return;
+  // }
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  // console.log("entre Xd"+req.body);  
+  const date =new Date(req.body["date"]) ;
+
+  const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
+  const schedules = await Schedule.find({ date });
+  const idsExcluidos = [];
+  for(const s of schedules){
+    idsExcluidos.push(s.vehicleId);
+  }
+  const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
+
+  const vehicles = await Vehicle.find({ '_id': { $nin: idsExcluidos } }).lean()
+  .exec();
+  res.json({"vehicles":vehicles});
+};
+module.exports.schedule_list_get = async (req, res, next) => {
+  console.log("ENTRANDO " + req.body);
+  let user = res.locals.user;
+  // if (user.academyId == null) {
+  //   res.status(400).end();
+
+  //   return;
+  // }
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  // console.log("entre Xd"+req.body);
+  const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
+  const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
+  const Client = getModelByTenant(academyId, "client", ClientSchema);
+
+  const schedules = await Schedule.find().lean().exec();
+  for(const s of schedules){
+    if(s.vehicleId!="Alquilar"){
+      s.vehicle = await Vehicle.findById(s.vehicleId).lean().exec();
+    }
+    s.client = await Client.findById(s.clientId).lean().exec();
+  }
+  res.json({"schedules":schedules});
+};
 module.exports.schedule_list_create = async (req, res, next) => {
-  console.log("ENTRANDO "+req.body);
+  console.log("ENTRANDO " + req.body);
   let user = res.locals.user;
   // if (user.academyId == null) {
   //   res.status(400).end();
@@ -25,7 +75,36 @@ module.exports.schedule_list_create = async (req, res, next) => {
   await Schedule.insertMany(scheduleListData);
   res.status(200).end();
 };
+module.exports.schedule_range_get = async (req, res, next) => {
+  console.log("ENTRANDO " + req.body);
+  let user = res.locals.user;
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
+  const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
 
+  // if (user.academyId == null) {
+  //   res.status(400).end();
+  const startDate = new Date(req.body["startDate"]);
+  const endDate = new Date(req.body["endDate"]);
+
+  // const startDate =  new Date(); // Fecha de inicio
+  // const endDate = new Date('2024-06-01'); // Fecha de fin
+
+  const registros = await Schedule.find({
+    date: {
+      $gte: startDate, // Mayor o igual que la fecha de inicio
+      $lte: endDate, // Menor o igual que la fecha de fin
+    },
+  }).lean()
+  .exec();
+  const numVehicles = await Vehicle.countDocuments({});
+  //   return;
+  // }
+  console.log(registros+" LOLL "+startDate+" POOOOOOO "+endDate+" YALA "+startDate.toISOString);
+  // console.log("entre Xd"+req.body);
+  // await Schedule.insertMany(scheduleListData);
+  res.json({"schedules":registros,"numVehicles":numVehicles});
+};
 // module.exports.client_get = async (req, res, next) => {
 //   let user = res.locals.user;
 //   const clientDni = req.body.clientDni;

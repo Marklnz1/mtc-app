@@ -61,13 +61,18 @@ app.post("/vehicle/create",vehicleController.vehicle_create);
 app.get("/vehicle/list",vehicleController.vehicle_list_get);
 
 app.post("/client/create",clientController.client_create);
-app.get("/client/list",clientController.client_list_get);
+app.post("/client/list",clientController.client_list_get);
 app.post("/client/schedules/get",clientController.schedule_list_get);
 app.post("/client/schedules/remove",clientController.schedule_list_remove);
 
 app.post("/client",clientController.client_get);
 
-app.post("/schedule/list",scheduleController.schedule_list_create);
+app.post("/schedule/list/create",scheduleController.schedule_list_create);
+app.post("/schedule/list/get",scheduleController.schedule_list_get);
+
+app.post("/schedule/range",scheduleController.schedule_range_get);
+app.post("/schedule/vehicle/list",scheduleController.schedule_vehicle_list);
+
 // app.get("/schedule/list",scheduleController.schedule_list_get);
 app.post("/debt/create",transactionController.debt_create);
 app.post("/payment/create",transactionController.payment_create);
