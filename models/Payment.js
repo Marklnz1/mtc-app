@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const PaymentSchema = new Schema({
-    clientId: String,
+    client:{type:String,ref:'client'},
     amount: Number,
     description: String,
     createdAt: { type: Date, default: Date.now },

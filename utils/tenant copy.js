@@ -1,5 +1,6 @@
 // const mongodb = require('../utils/mongodb');
-const { Mongoose } = require('mongoose');
+const mongoose = require('mongoose');
+// const { Mongoose } = require('mongoose');
 const util = require('util')
 const multitenantPool = {};
 
@@ -15,15 +16,23 @@ const getTenantDB = function getConnections(tenantId, modelName, schema) {
   }
 
   const mongoose = new Mongoose();
+  const connect = () => mongoose.createConnection(process.env.MONGODB_URL, mongoOptions);
   const url = process.env.MONGODB_URL.replace(/academy/, `academy_${tenantId}`);
-  mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+  const db=connect(url, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+    autoIndex: true,
+    poolSize: 10,
+    bufferMaxEntries: 0,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 30000,
     });
-  multitenantPool[tenantId] = mongoose;
-  mongoose.model(modelName, schema,modelName);
-  mongoose.connection.on('error', err => console.log(err));
-  mongoose.connection.once('open', () => console.log(`mongodb connected to ${url}`));
+  multitenantPool[tenantId] = db;
+  db.model(modelName, schema,modelName);
+  db.on('error', err => console.log(err));
+  db.once('open', () => console.log(`mongodb connected to ${url}`));
   return mongoose;
 };
 

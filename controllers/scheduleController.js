@@ -23,22 +23,25 @@ module.exports.schedule_vehicle_list = async (req, res, next) => {
   // }
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   // console.log("entre Xd"+req.body);  
-  const date =new Date(req.body["date"]) ;
+  const date = new Date(req.body["date"]);
 
   const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
   const schedules = await Schedule.find({ date });
   const idsExcluidos = [];
-  for(const s of schedules){
-    if(s.vehicleId=="Alquilar"){
+  console.log("fecha " + date + " " + schedules);
+  console.log("WTFFFFFFFFFFFFFFFFFF "+schedules);
+  for (const s of schedules) {
+    if (s.vehicle == "Alquilar") {
       continue;
     }
-    idsExcluidos.push(s.vehicleId);
+    idsExcluidos.push(s.vehicle);
   }
   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
 
   const vehicles = await Vehicle.find({ '_id': { $nin: idsExcluidos } }).lean()
-  .exec();
-  res.json({"vehicles":vehicles});
+    .exec();
+  console.log("vehiculos " + vehicles + "  " + vehicles.length);
+  res.json({ "vehicles": vehicles });
 };
 module.exports.schedule_list_get = async (req, res, next) => {
   console.log("ENTRANDO " + req.body);
@@ -51,17 +54,34 @@ module.exports.schedule_list_get = async (req, res, next) => {
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   // console.log("entre Xd"+req.body);
   const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
-  const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
-  const Client = getModelByTenant(academyId, "client", ClientSchema);
+  getModelByTenant(academyId, "vehicle", VehicleSchema);
+  // const Client = 
+  getModelByTenant(academyId, "client", ClientSchema);
 
-  const schedules = await Schedule.find().lean().exec();
-  for(const s of schedules){
-    if(s.vehicleId!="Alquilar"){
-      s.vehicle = await Vehicle.findById(s.vehicleId).lean().exec();
-    }
-    s.client = await Client.findById(s.clientId).lean().exec();
+  let schedules;
+  if(req.body["date"]!=null){
+    const date = new Date(req.body["date"]);
+
+    schedules = await Schedule.find({date}).populate("vehicle").populate("client").lean().exec();
+    console.log(schedules);
+
+  }else if(req.body["clientId"]!=null){
+    schedules = await Schedule.find({client:req.body["clientId"]}).populate("vehicle").populate("client").lean().exec();
+
+  }else if(req.body["vehicleId"]!=null){
+    schedules = await Schedule.find({vehicle:req.body["vehicleId"]}).populate("client").lean().exec();
+
+  }else{
+    schedules = await Schedule.find().populate("vehicle").populate("client").lean().exec();
+
   }
-  res.json({"schedules":schedules});
+  // for(const s of schedules){
+  //   if(s.vehicleId!="Alquilar"){
+  //     s.vehicle = await Vehicle.findById(s.vehicleId).lean().exec();
+  //   }
+  //   s.client = await Client.findById(s.clientId).lean().exec();
+  // }
+  res.json({ "schedules": schedules });
 };
 module.exports.schedule_list_create = async (req, res, next) => {
   console.log("ENTRANDO " + req.body);
@@ -84,7 +104,7 @@ module.exports.schedule_range_get = async (req, res, next) => {
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
   const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
-
+  getModelByTenant(academyId, "client", ClientSchema);
   // if (user.academyId == null) {
   //   res.status(400).end();
   const startDate = new Date(req.body["startDate"]);
@@ -98,15 +118,14 @@ module.exports.schedule_range_get = async (req, res, next) => {
       $gte: startDate, // Mayor o igual que la fecha de inicio
       $lte: endDate, // Menor o igual que la fecha de fin
     },
-  }).lean()
-  .exec();
+  }).populate("vehicle").populate("client").lean().exec();
   const numVehicles = await Vehicle.countDocuments({});
   //   return;
   // }
-  console.log(registros+" LOLL "+startDate+" POOOOOOO "+endDate+" YALA "+startDate.toISOString);
+  console.log(registros + " LOLL " + startDate + " POOOOOOO " + endDate + " YALA " + startDate.toISOString);
   // console.log("entre Xd"+req.body);
   // await Schedule.insertMany(scheduleListData);
-  res.json({"schedules":registros,"numVehicles":numVehicles});
+  res.json({ "schedules": registros, "numVehicles": numVehicles });
 };
 // module.exports.client_get = async (req, res, next) => {
 //   let user = res.locals.user;

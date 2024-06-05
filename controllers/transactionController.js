@@ -13,7 +13,7 @@ module.exports.debt_create = async (req, res, next) => {
     if(payment!=null){
         debt.amount-=payment.amount;
         const Payment = getModelByTenant(academyId, "payment", PaymentSchema);
-        const newPayment = new Payment({clientId:debt.clientId,amount:payment.amount,description:debt.description});
+        const newPayment = new Payment({client:debt.clientId,amount:payment.amount,description:debt.description});
         await newPayment.save();
     }
     // console.log("entre Xd"+req.body);
@@ -40,7 +40,7 @@ module.exports.debt_create = async (req, res, next) => {
     // console.log("entre Xd"+req.body);
     const Payment = getModelByTenant(academyId, "payment", PaymentSchema);
 
-    const newPayment = new Payment({clientId:payment.clientId,amount:payment.amount,description:payment.description});
+    const newPayment = new Payment({client:payment.clientId,amount:payment.amount,description:payment.description});
     await newPayment.save();
     res.status(200).end();
   };
@@ -50,11 +50,13 @@ module.exports.debt_create = async (req, res, next) => {
     let user = res.locals.user;
     const academyId = user.academyId ?? "6654558ffee910176819a803";
     const Payment = getModelByTenant(academyId, "payment", PaymentSchema);
-    const payments = await Payment.find().lean().exec();
-    const Client = getModelByTenant(academyId, "client", ClientSchema);
+    getModelByTenant(academyId, "client", ClientSchema);
+    const payments = await Payment.find().populate("client").lean().exec();
+    // const Client = getModelByTenant(academyId, "client", ClientSchema);
 
-    for(const p of payments){
-        p.client = await Client.findById(p.clientId).lean().exec();
-    }
+    // for(const p of payments){
+    //     p.client = await Client.findById(p.clientId).lean().exec();
+    // }
+    console.log("PAGOS  "+payments);
     res.json({"payments":payments});
   };

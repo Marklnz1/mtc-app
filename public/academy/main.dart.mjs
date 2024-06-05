@@ -686,12 +686,15 @@ _1903: () => globalThis.window,
 _1924: x0 => x0.matches,
 _1928: x0 => x0.platform,
 _1933: x0 => x0.navigator,
-_1977: (x0,x1) => x0.withCredentials = x1,
-_1980: x0 => x0.responseURL,
-_1981: x0 => x0.status,
-_1982: x0 => x0.statusText,
-_1983: (x0,x1) => x0.responseType = x1,
-_1985: x0 => x0.response
+_1981: (x0,x1) => x0.withCredentials = x1,
+_1984: x0 => x0.responseURL,
+_1985: x0 => x0.status,
+_1986: x0 => x0.statusText,
+_1987: (x0,x1) => x0.responseType = x1,
+_1989: x0 => x0.response,
+_3746: () => globalThis.window,
+_3807: x0 => x0.location,
+_4093: (x0,x1) => x0.href = x1
     };
 
     const baseImports = {
