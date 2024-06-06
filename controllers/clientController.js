@@ -30,7 +30,7 @@ module.exports.client_create = async (req, res, next) => {
   await newClient.save();
   console.log(util.inspect(newClient));
 
-  res.json({"client":newClient});
+  res.json({ "client": newClient });
 };
 module.exports.schedule_list_get = async (req, res, next) => {
   let user = res.locals.user;
@@ -38,12 +38,12 @@ module.exports.schedule_list_get = async (req, res, next) => {
 
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
-  const schedules = await Schedule.find({client:userData.clientId}).lean().exec();
+  const schedules = await Schedule.find({ client: userData.clientId }).lean().exec();
   res.json({ "schedules": schedules ?? [] });
 };
 module.exports.schedule_list_remove = async (req, res, next) => {
   let user = res.locals.user;
-  const scheduleIds = req.body.scheduleIds; 
+  const scheduleIds = req.body.scheduleIds;
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
   await Schedule.deleteMany({ _id: { $in: scheduleIds } })
@@ -54,27 +54,50 @@ module.exports.schedule_list_remove = async (req, res, next) => {
 module.exports.client_list_get = async (req, res, next) => {
   let user = res.locals.user;
 
-  const academyId = user.academyId ?? "6654558ffee910176819a803";
-  // const clientIds =  req.body.clientIds; 
-  // if(clientIds!=null){
-  //   const Client = getModelByTenant(academyId, "client", ClientSchema);
-  //   const clients = await Client.find({ '_id': { $in: clientIds } }).lean().exec();
-  //   if( req.body.date!=null){
-  //     const date = new Date( req.body.date);
-  //     const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
 
-  //     for(const c of clients){
-  //       c.vehicle = (await Schedule.findOne({date,clientId:c._id}).lean().exec())?.vehicleId;
-  //     }
-  //   }
-   
-  //   res.json({ "clients": clients ?? [] });
-  // }else{
-    const Client = getModelByTenant(academyId, "client", ClientSchema);
-    const clients = await Client.find().lean().exec();
-    res.json({ "clients": clients ?? [] });
-  // }
- 
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+
+  const Client = getModelByTenant(academyId, "client", ClientSchema);
+  let nameFilter = req.body.nameFilter;
+  let dniFilter = req.body.dniFilter;
+
+  let numPages = 1;
+
+  let clients = [];
+
+  let findData = {};
+
+  if (dniFilter != null) {
+    console.log("entrando?? :V Xd 111111111111");
+
+   const client = await Client.findOne({ "dni": dniFilter }).lean().exec();
+   if(client!=null){
+    clients = [client];
+   }
+    console.log("entrando?? :V Xd " + clients);
+  } else {
+
+    if (nameFilter != null) {
+      findData.name = { "$regex": nameFilter, "$options": "i" };
+    }
+    let numClients = await Client.countDocuments(findData);
+    numClients??=0;
+
+    console.log("HAY  "+numClients);
+    let limit = Math.abs(req.query.limit) || 8;
+    numPages = Math.ceil(numClients / limit);
+
+    
+    let page = (Math.abs(req.body.page) || 0);
+    page = clamp(page,0,clamp(numPages-1,0,Number.MAX_SAFE_INTEGER));
+    clients = await Client.find(findData).sort({ createdAt: -1 }).limit(limit).skip(limit * page).lean().exec();
+  }
+console.log("devolviendoooooooooooooo  "+numPages+"  "+clients);
+
+
+
+  res.json({ "clients": clients ?? [], numPages });
+
 };
 module.exports.client_get = async (req, res, next) => {
   let user = res.locals.user;
@@ -82,5 +105,12 @@ module.exports.client_get = async (req, res, next) => {
   const academyId = user.academyId ?? "6654558ffee910176819a803";
   const Client = getModelByTenant(academyId, "client", ClientSchema);
   const client = await Client.findOne({ dni: clientDni }).lean().exec();
-  res.json({ "client": client});
+  res.json({ "client": client });
 };
+function clamp(num, min, max) {
+  return num <= min 
+    ? min 
+    : num >= max 
+      ? max 
+      : num
+}

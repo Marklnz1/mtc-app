@@ -58,7 +58,7 @@ app.get("/admin/academy/list",adminController.list_academy);
 app.post("/admin/academy",adminController.get_academy);
 
 app.post("/vehicle/create",vehicleController.vehicle_create);
-app.get("/vehicle/list",vehicleController.vehicle_list_get);
+app.post("/vehicle/list",vehicleController.vehicle_list_get);
 
 app.post("/client/create",clientController.client_create);
 app.post("/client/list",clientController.client_list_get);
@@ -76,6 +76,6 @@ app.post("/schedule/vehicle/list",scheduleController.schedule_vehicle_list);
 // app.get("/schedule/list",scheduleController.schedule_list_get);
 app.post("/debt/create",transactionController.debt_create);
 app.post("/payment/create",transactionController.payment_create);
-app.get("/payment/list/get",transactionController.payment_list);
+app.post("/payment/list/get",transactionController.payment_list);
 
 console.log("Servidor encendido en http://localhost:"+PORT);
