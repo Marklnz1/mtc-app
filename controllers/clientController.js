@@ -14,6 +14,34 @@ const { getModelByTenant } = require("../utils/tenant");
 //   await newVehicle.save();
 //   res.status(200).end();
 // };
+module.exports.client_delete = async (req, res, next) => {
+  let user = res.locals.user;
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  const Client = getModelByTenant(academyId, "client", ClientSchema);
+  const clientId = req.body.clientId;
+  const state = "removed";
+  await Client.findOneAndUpdate({ _id: clientId }, { state });
+  console.log("ELIMINANDO ????? " + clientId);
+  res.json({});
+};
+module.exports.client_update = async (req, res, next) => {
+  let user = res.locals.user;
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  const Client = getModelByTenant(academyId, "client", ClientSchema);
+  const clientId = req.body.clientId;
+  const clientData = req.body.clientData;
+  const client = await Client.findById(clientId);
+  if (client.dni.trim() != clientData.dni.trim()) {
+    const clientClone = await Client.findOne({ dni: clientData.dni ,state: { $ne: 'removed' }});
+    if (clientClone != null) {
+      res.json({ "error": "El DNI le pertenece a otro Cliente" })
+      return;
+    }
+  }
+  await Client.findOneAndUpdate({ _id: clientId }, clientData);
+  console.log("ACTUALIZANDO ????? " + clientId + "  data " + util.inspect(clientData));
+  res.json({});
+};
 module.exports.client_create = async (req, res, next) => {
   let user = res.locals.user;
   // if (user.academyId == null) {
@@ -25,6 +53,12 @@ module.exports.client_create = async (req, res, next) => {
   // console.log("entre Xd"+req.body);
   const Client = getModelByTenant(academyId, "client", ClientSchema);
   const clientData = req.body;
+  const clientClone = await Client.findOne({ dni: clientData.dni.trim() ,state: { $ne: 'removed' }});
+  if (clientClone != null) {
+    res.json({ "error": "El DNI le pertenece a otro Cliente" })
+    return;
+  }
+
   const newClient = new Client(clientData);
   console.log(util.inspect(newClient));
   await newClient.save();
@@ -65,15 +99,15 @@ module.exports.client_list_get = async (req, res, next) => {
 
   let clients = [];
 
-  let findData = {};
+  let findData = { state: { $ne: 'removed' } };
 
   if (dniFilter != null) {
     console.log("entrando?? :V Xd 111111111111");
-
-   const client = await Client.findOne({ "dni": dniFilter }).lean().exec();
-   if(client!=null){
-    clients = [client];
-   }
+    findData.dni = dniFilter;
+    const client = await Client.findOne(findData).lean().exec();
+    if (client != null) {
+      clients = [client];
+    }
     console.log("entrando?? :V Xd " + clients);
   } else {
 
@@ -81,18 +115,18 @@ module.exports.client_list_get = async (req, res, next) => {
       findData.name = { "$regex": nameFilter, "$options": "i" };
     }
     let numClients = await Client.countDocuments(findData);
-    numClients??=0;
+    numClients ??= 0;
 
-    console.log("HAY  "+numClients);
+    console.log("HAY  " + numClients + "lol " + util.inspect(findData));
     let limit = Math.abs(req.query.limit) || 8;
     numPages = Math.ceil(numClients / limit);
 
-    
+
     let page = (Math.abs(req.body.page) || 0);
-    page = clamp(page,0,clamp(numPages-1,0,Number.MAX_SAFE_INTEGER));
+    page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
     clients = await Client.find(findData).sort({ createdAt: -1 }).limit(limit).skip(limit * page).lean().exec();
   }
-console.log("devolviendoooooooooooooo  "+numPages+"  "+clients);
+  console.log("devolviendoooooooooooooo  " + numPages + "  " + clients);
 
 
 
@@ -108,9 +142,9 @@ module.exports.client_get = async (req, res, next) => {
   res.json({ "client": client });
 };
 function clamp(num, min, max) {
-  return num <= min 
-    ? min 
-    : num >= max 
-      ? max 
+  return num <= min
+    ? min
+    : num >= max
+      ? max
       : num
 }

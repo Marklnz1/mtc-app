@@ -43,7 +43,34 @@ module.exports.debt_create = async (req, res, next) => {
   }
   res.status(200).end();
 };
+module.exports.payment_update = async (req, res, next) => {
+  console.log("ENTRANDO " + req.body);
+  let user = res.locals.user;
+  const academyId = user.academyId ?? "6654558ffee910176819a803";
+  const paymentData = req.body["paymentData"];
 
+  const clientDni = req.body["clientDni"];
+  const Client = getModelByTenant(academyId, "client", ClientSchema);
+  if(clientDni==null){
+    console.log("sin registro ");
+    res.json({ "error": "No ingreso ningun DNI" });
+    return;
+  }
+  const client =  await Client.findOne({ dni: clientDni });
+  // console.log("ENSERIO CLIENTE ???? "+clientDni+"   a"+ util.inspect(client)+" clients "+await Client.find());
+  if (client == null) {
+    console.log("NO EXISTEEEEEEEEEEEEEE");
+    res.json({ "error": "El DNI no esta registrado" });
+  } else {
+    const paymentId = paymentData.id;
+    const Payment = getModelByTenant(academyId, "payment", PaymentSchema);
+    await Payment.findOneAndUpdate({ _id: paymentId },
+      { amount: paymentData.amount, description: paymentData.description, client: client._id });
+
+    res.json({});
+  }
+
+};
 module.exports.payment_create = async (req, res, next) => {
   console.log("ENTRANDO " + req.body);
   let user = res.locals.user;
@@ -100,7 +127,7 @@ module.exports.payment_list = async (req, res, next) => {
 
     const response = await Client.aggregate([
       { $match: findData }, // Filtra por DNI
-      { $group: { _id: null, totalItems: { $sum: { $size: { "$ifNull": [ "$payments", [] ] } } } } } // Suma el tamaño de la lista 'items'
+      { $group: { _id: null, totalItems: { $sum: { $size: { "$ifNull": ["$payments", []] } } } } } // Suma el tamaño de la lista 'items'
     ]);
 
     const numPayments = response[0]?.totalItems ?? 0;
@@ -113,12 +140,13 @@ module.exports.payment_list = async (req, res, next) => {
     let page = (Math.abs(req.body.page) || 0);
     page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
     let clients = await Client.find(findData).sort({ createdAt: -1 }).limit(limit).skip(limit * page).populate("payments").lean().exec();
-    clients = clients??[];
-    for(const c of clients){
-      if ( c.payments != null) {
-        payments.push(...c.payments);
+    clients = clients ?? [];
+    for (const c of clients) {
+      if (c.payments != null) {
+        const clientPayments = c.payments;
+        payments.push(...clientPayments);
         c.payments = null;
-        for (const p of payments) {
+        for (const p of clientPayments) {
           p.client = c;
         }
       }
@@ -131,10 +159,10 @@ module.exports.payment_list = async (req, res, next) => {
 
     let page = (Math.abs(req.body.page) || 0);
     page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
-    console.log("HAY  "+numPayments+" page "+page+" numPages: "+numPages+" limit "+limit);
+    console.log("HAY  " + numPayments + " page " + page + " numPages: " + numPages + " limit " + limit);
 
     payments = await Payment.find().populate("client").sort({ createdAt: -1 }).limit(limit).skip(limit * page).lean().exec();
-    
+    // console.log("payments "+await Payment.find());
   }
 
 

@@ -6,10 +6,9 @@ const ClientSchema = new Schema({
     name:String,
     phone:String,
     email:String,
-    status:String,
+    state:String,
     payments:[{type:String,ref:'payment'}],
     debts:[{type:String,ref:'debt'}],
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }  
-});
+    schedules:[{type:String,ref:'schedule'}]
+},{ timestamps: true });
 module.exports = ClientSchema;

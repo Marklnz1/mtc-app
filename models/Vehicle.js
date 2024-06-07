@@ -6,9 +6,8 @@ const VehicleSchema = new Schema({
     plate:String,
     model:String,
     description:String,
-    type:String,
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }    
-});
+    type:String, 
+    state:String,
+},{ timestamps: true });
 // const Vehicle = mongoose.model('vehicle',vehicleSchema,"vehicle");
 module.exports = VehicleSchema;
