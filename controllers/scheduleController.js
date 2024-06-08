@@ -68,6 +68,7 @@ module.exports.schedule_list_get = async (req, res, next) => {
   let numSchedules;
   let findData = {};
   let schedules = [];
+  console.log("ENTRANDO PERO A QUE COSTO OOOOOOOOOOOOOO "+util.inspect(req.body));
   if (dniFilter != null) {
     console.log("entrando?? :V Xd 111111111111");
 
@@ -85,6 +86,8 @@ module.exports.schedule_list_get = async (req, res, next) => {
         p.client = client;
       }
     }
+    // numSchedules=schedules.length;
+
     console.log("entrando?? :V Xd " + util.inspect(schedules));
   } else if (nameFilter != null) {
 
@@ -99,7 +102,6 @@ module.exports.schedule_list_get = async (req, res, next) => {
     numSchedules = response[0]?.totalItems ?? 0;
 
     console.log("HAY  " + numSchedules);
-    let limit = Math.abs(req.query.limit) || 8;
     numPages = Math.ceil(numSchedules / limit);
 
 
@@ -121,26 +123,42 @@ module.exports.schedule_list_get = async (req, res, next) => {
   } else if (req.body["date"] != null) {
     const date = new Date(req.body["date"]);
     numSchedules = await Schedule.countDocuments({ date });
-
+    numPages = Math.ceil(numSchedules / limit);
+    let page = (Math.abs(req.body.page) || 0);
+    page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
     schedules = await Schedule.find({ date }).limit(limit).skip(limit * page).populate("vehicle").populate("client").lean().exec();
 
     console.log(schedules);
 
   } else if (req.body["clientId"] != null) {
     numSchedules = await Schedule.countDocuments({ client: req.body["clientId"] });
+    numPages = Math.ceil(numSchedules / limit);
+
+
+    let page = (Math.abs(req.body.page) || 0);
+    page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
+    console.log("ENTRANDO TAMAÑOOOOOOOOOOOO "+numSchedules);
+
     schedules = await Schedule.find({ client: req.body["clientId"] }).limit(limit).skip(limit * page).populate("vehicle").populate("client").lean().exec();
   } else if (req.body["vehicleId"] != null) {
     numSchedules = await Schedule.countDocuments();
+    numPages = Math.ceil(numSchedules / limit);
 
+
+    let page = (Math.abs(req.body.page) || 0);
+    page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
     schedules = await Schedule.find({ vehicle: req.body["vehicleId"] }).limit(limit).skip(limit * page).populate("client").lean().exec();
 
   } else {
     numSchedules = await Schedule.countDocuments({});
+    numPages = Math.ceil(numSchedules / limit);
+   let page = (Math.abs(req.body.page) || 0);
+    page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
     schedules = await Schedule.find().populate("vehicle").limit(limit).skip(limit * page).populate("client").lean().exec();
 
   }
   numSchedules ??= 0;
-  console.log("QUE FUEEEEEEEEE " + numSchedules);
+  console.log("QUE FUEEEEEEEEE " + numSchedules+ " asdasd  "+schedules);
   numPages = Math.ceil(numSchedules / limit);
 
   // for(const s of schedules){

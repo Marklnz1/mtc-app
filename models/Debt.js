@@ -1,9 +1,13 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const DebtSchema = new Schema({
-    client:{type:String,ref:'client'},
+const DebtSchema = new Schema(
+  {
+    client: { type: String, ref: "client" },
     amount: Number,
-    description: String
-},{ timestamps: true });
+    description: String,
+    type: String,
+  },
+  { timestamps: true }
+);
 module.exports = DebtSchema;

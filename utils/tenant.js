@@ -1,15 +1,15 @@
 // const mongodb = require('../utils/mongodb');
-const { Mongoose } = require('mongoose');
-const util = require('util')
+const { Mongoose } = require("mongoose");
+const util = require("util");
 const multitenantPool = {};
 
 const getTenantDB = function getConnections(tenantId, modelName, schema) {
   // Check connections lookup
   const mCon = multitenantPool[tenantId];
   if (mCon) {
-    if (!mCon.modelSchemas[modelName]) {
-      console.log("ENTREEEEEEEEEEEEEEEEEEEEEEEEEEE "+modelName);
-      mCon.model(modelName, schema,modelName);
+    if (!mCon.models[modelName]) {
+      // console.log("ENTREEEEEEEEEEEEEEEEEEEEEEEEEEE " + modelName);
+      mCon.model(modelName, schema, modelName);
     }
     return mCon;
   }
@@ -17,13 +17,15 @@ const getTenantDB = function getConnections(tenantId, modelName, schema) {
   const mongoose = new Mongoose();
   const url = process.env.MONGODB_URL.replace(/academy/, `academy_${tenantId}`);
   mongoose.connect(url, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
   multitenantPool[tenantId] = mongoose;
-  mongoose.model(modelName, schema,modelName);
-  mongoose.connection.on('error', err => console.log(err));
-  mongoose.connection.once('open', () => console.log(`mongodb connected to ${url}`));
+  mongoose.model(modelName, schema, modelName);
+  mongoose.connection.on("error", (err) => console.log(err));
+  mongoose.connection.once("open", () =>
+    console.log(`mongodb connected to ${url}`)
+  );
   return mongoose;
 };
 
