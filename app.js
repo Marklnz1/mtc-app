@@ -70,6 +70,7 @@ app.post(
 app.post("/vehicle/list", vehicleController.vehicle_list_get);
 
 app.post("/vehicle/delete", vehicleController.vehicle_delete);
+app.post("/vehicle/list/available", vehicleController.available_vehicle_list);
 
 app.post(
   "/client/create",
@@ -90,14 +91,14 @@ app.post("/client/schedules/remove", clientController.schedule_list_remove);
 
 app.post("/schedule/list/create", scheduleController.schedule_list_create);
 app.post("/schedule/list/get", scheduleController.schedule_list_get);
-
 app.post("/schedule/range", scheduleController.schedule_range_get);
-app.post("/schedule/vehicle/list", scheduleController.schedule_vehicle_list);
+app.post("/schedule/delete", scheduleController.schedule_delete);
 
 // app.get("/schedule/list",scheduleController.schedule_list_get);
 app.post("/debt/create", transactionController.debt_create);
 app.post("/payment/create", transactionController.payment_create);
 app.post("/payment/update", transactionController.payment_update);
+app.post("/payment/delete", transactionController.payment_delete);
 
 app.post("/payment/list/get", transactionController.payment_list);
 app.post("/debt/list/get", transactionController.debt_list);

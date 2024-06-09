@@ -87,6 +87,7 @@ async function validateDNI(dni, clientId, academyId) {
     client = await Client.findOne({
       dni: dni,
       _id: { $ne: clientId },
+      state: { $ne: "removed" },
     });
   } catch (error) {
     throw new Error("Error al verificar el DNI");

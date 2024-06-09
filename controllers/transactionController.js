@@ -4,6 +4,20 @@ const ClientSchema = require("../models/Client");
 const util = require("util");
 
 const { getModelByTenant } = require("../utils/tenant");
+
+module.exports.payment_delete = async (req, res, next) => {
+  try {
+    const academyId = res.locals.user.academyId;
+    const Payment = getModelByTenant(academyId, "payment", PaymentSchema);
+    await Payment.findOneAndUpdate(
+      { _id: req.body.paymentId },
+      { state: "removed" }
+    );
+    res.status(200).json({});
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 module.exports.debt_create = async (req, res, next) => {
   console.log("ENTRANDO " + req.body);
   let user = res.locals.user;
@@ -128,7 +142,10 @@ module.exports.debt_list = async (req, res, next) => {
   if (dniFilter != null) {
     console.log("entrando?? :V Xd 111111111111");
 
-    const client = await Client.findOne({ dni: dniFilter })
+    const client = await Client.findOne({
+      dni: dniFilter,
+      state: { $ne: "removed" },
+    })
       .populate("debts")
       .lean()
       .exec();
@@ -141,13 +158,13 @@ module.exports.debt_list = async (req, res, next) => {
     }
     // console.log("entrando?? :V Xd " + util.inspect(debts));
   } else {
-    let numPayments = await Debt.countDocuments();
+    let numPayments = await Debt.countDocuments({ state: { $ne: "removed" } });
     let limit = Math.abs(req.query.limit) || 8;
     numPages = Math.ceil(numPayments / limit);
 
     let page = Math.abs(req.body.page) || 0;
     page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
-    debts = await Debt.find()
+    debts = await Debt.find({ state: { $ne: "removed" } })
       .populate("client")
       .sort({ createdAt: -1 })
       .limit(limit)
@@ -171,12 +188,15 @@ module.exports.payment_list = async (req, res, next) => {
 
   let numPages = 1;
 
-  let findData = {};
+  let findData = { state: { $ne: "removed" } };
   let payments = [];
   if (dniFilter != null) {
     console.log("entrando?? :V Xd 111111111111");
 
-    const client = await Client.findOne({ dni: dniFilter })
+    const client = await Client.findOne({
+      dni: dniFilter,
+      state: { $ne: "removed" },
+    })
       .populate("payments")
       .lean()
       .exec();
@@ -229,7 +249,9 @@ module.exports.payment_list = async (req, res, next) => {
       }
     }
   } else {
-    let numPayments = await Payment.countDocuments();
+    let numPayments = await Payment.countDocuments({
+      state: { $ne: "removed" },
+    });
     let limit = Math.abs(req.query.limit) || 8;
     numPages = Math.ceil(numPayments / limit);
 
@@ -246,7 +268,7 @@ module.exports.payment_list = async (req, res, next) => {
         limit
     );
 
-    payments = await Payment.find()
+    payments = await Payment.find({ state: { $ne: "removed" } })
       .populate("client")
       .sort({ createdAt: -1 })
       .limit(limit)

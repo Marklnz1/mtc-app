@@ -8,6 +8,7 @@ const PaymentSchema = new Schema(
     amount: Number,
     description: String,
     type: String,
+    state: String,
   },
   { timestamps: true }
 );

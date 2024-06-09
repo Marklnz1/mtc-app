@@ -19,7 +19,10 @@ module.exports.client_read = async (req, res, next) => {
   try {
     const academyId = res.locals.user.academyId;
     const Client = getModelByTenant(academyId, "client", ClientSchema);
-    const client = await Client.findOne({ dni: req.body.clientDni });
+    const client = await Client.findOne({
+      dni: req.body.clientDni,
+      state: { $ne: "removed" },
+    });
     res.status(200).json({ client });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -84,6 +87,10 @@ function fixedPage(page, numPages) {
   page = clamp(page, 0, clamp(numPages - 1, 0, Number.MAX_SAFE_INTEGER));
   return page;
 }
+function clamp(num, min, max) {
+  return num <= min ? min : num >= max ? max : num;
+}
+
 //=======================================================================================
 module.exports.schedule_list_get = async (req, res, next) => {
   let user = res.locals.user;
@@ -105,7 +112,3 @@ module.exports.schedule_list_remove = async (req, res, next) => {
   await Schedule.deleteMany({ _id: { $in: scheduleIds } });
   res.status(200).end();
 };
-
-function clamp(num, min, max) {
-  return num <= min ? min : num >= max ? max : num;
-}

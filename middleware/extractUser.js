@@ -26,7 +26,7 @@ const extractUser = async (res, token) => {
     }
   } else {
     res.locals.user = {
-      academyId: "6654558ffee910176819a803",
+      academyId: "665441962ca1381af8f870d3",
     };
   }
 };

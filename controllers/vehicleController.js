@@ -1,6 +1,9 @@
 const VehicleSchema = require("../models/Vehicle");
 const { getModelByTenant } = require("../utils/tenant");
+const ScheduleSchema = require("../models/Schedule");
+
 const util = require("util");
+
 module.exports.vehicle_create = async (req, res, next) => {
   try {
     const academyId = res.locals.user.academyId;
@@ -66,6 +69,26 @@ module.exports.vehicle_list_get = async (req, res, next) => {
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
+};
+module.exports.available_vehicle_list = async (req, res, next) => {
+  let data = req.body;
+  const academyId = res.locals.user.academyId;
+  const date = new Date(data["date"]);
+  const Schedule = getModelByTenant(academyId, "schedule", ScheduleSchema);
+  const schedules = await Schedule.find({ date });
+  const excludedIds = [];
+  for (const s of schedules) {
+    excludedIds.push(s.vehicle);
+  }
+  const Vehicle = getModelByTenant(academyId, "vehicle", VehicleSchema);
+
+  const vehicles = await Vehicle.find({
+    _id: { $nin: excludedIds },
+    state: { $ne: "removed" },
+  })
+    .lean()
+    .exec();
+  res.json({ vehicles: vehicles });
 };
 function fixedPage(page, numPages) {
   page = Math.abs(page) || 0;
