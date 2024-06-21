@@ -43,7 +43,7 @@ app.get("/", (req, res, next) => {
   } else if (user.role == "academy") {
     res.render("academy/index");
   } else {
-    res.render("login/index");
+    res.render("home/index");
   }
 });
 
