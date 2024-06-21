@@ -46,7 +46,9 @@ app.get("/", (req, res, next) => {
     res.render("home/index");
   }
 });
-
+app.get("/home", (req, res, next) => {
+  res.render("home/index");
+});
 app.get("/login", authController.login_get);
 app.post("/login", authController.login_post);
 app.get("/logout", authController.logout_get);
