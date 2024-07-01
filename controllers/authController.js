@@ -50,9 +50,11 @@ module.exports.login_get = async (req, res, next) => {
 module.exports.logout_get = (req, res, next) => {
   if (res.locals.user) {
     res.cookie("jwt", "", { maxAge: 1 });
-    res.redirect("/");
     req.logout((err)=>{
+     
     });
+    res.redirect("/");
+   
   } else {
     res.redirect("/");
   }

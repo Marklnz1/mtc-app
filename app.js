@@ -235,4 +235,4 @@ app.post(
   transactionController.debt_list
 );
 
-console.log("Servidor encendido en http://localhost:" + PORT);
+console.log("Servidor encendido en "+process.env.DOMAIN_URL);
