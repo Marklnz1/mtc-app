@@ -45,7 +45,7 @@ app.use(session({
   secret:'secret',
   resave:false,
   saveUninitialized:true,
-  cookie:{secure:true}
+  cookie:{secure:false}
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -60,11 +60,11 @@ app.get('/auth/google',
 app.get( '/auth/google/callback',
     passport.authenticate( 'google', {
         successRedirect: '/',
-        failureRedirect: '/'
+        failureRedirect: '/login'
 }));
-// app.get('/auth/google/failure',isLoggedIn,(req,res)=>{
-//   res.send('aaaaaaaaaaa :V!');
-// });
+app.get('/auth/google/failure',isLoggedIn,(req,res)=>{
+  res.send('error en el login');
+});
 // app.get('/auth/google/success',isLoggedIn,(req,res)=>{
 //   res.send('hello there!'+util.inspect(req.user));
 // });
