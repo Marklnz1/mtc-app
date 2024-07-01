@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.5",
     "cookie-session": "^2.1.0",
     "dotenv": "^16.4.5",
@@ -21,7 +22,8 @@
     "lorem-ipsum": "^2.0.4",
     "mongoose": "^8.4.1",
     "node-fetch": "^3.1.0",
-    "passport": "^0.5.3",
+    "nodemailer": "^6.9.14",
+    "passport": "^0.7.0",
     "passport-google-oauth2": "^0.2.0",
     "validator": "^13.12.0"
   }

@@ -10,9 +10,10 @@ const util = require("util");
 require('./utils/google_auth');
 
 const cookieParser = require("cookie-parser");
+const nodemailer = require('nodemailer');
 const authController = require("./controllers/authController");
 const adminController = require("./controllers/adminController");
-
+const bodyParser = require('body-parser');
 const extractUser = require("./middleware/extractUser");
 
 const vehicleController = require("./controllers/vehicleController");
@@ -23,6 +24,8 @@ const clientValidator = require("./validator/clientValidator");
 const vehicleValidator = require("./validator/vehicleValidator");
 
 const PORT = process.env.PORT;
+const PASS_EMAIL = process.env.PASS_EMAIL;
+
 // let dbURI = process.env.MONGODB_URL;
 
 // mongoose.connect(dbURI, {
@@ -36,7 +39,7 @@ app.listen(PORT);
 app.use(express.static("public"));
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("view engine", "html");
 app.engine("html", require("ejs").renderFile);
@@ -88,6 +91,35 @@ app.get("/home", (req, res, next) => {
 // app.get("/update", authController.update);
 
 app.get("/login", authController.login_get);
+app.post("/email/send", (req,res,next)=>{
+  // console.log(req.body);
+  // res.json({message:"xd"});
+  // return;
+  const from = "autotechtmp@gmail.com";
+  const to = "autotechtmp@gmail.com";
+  const subject = "Contacto";
+  const message = "nombre:"+req.body.name+" || correo:"+req.body.email+" || teléfono:"+req.body.email+" || mensaje:"+req.body.message;
+  const transporter = nodemailer.createTransport({
+    service:"gmail",
+    auth:{
+      user: 'autotechtmp@gmail.com',
+      pass:PASS_EMAIL
+      // lqyb veov dmom xrfn
+    }
+  });
+  const mailOptions={
+    from,to,subject,text:message
+  }
+  transporter.sendMail(mailOptions,function(error,info){
+    if(error){
+      console.log(error);
+    }else{
+      console.log('Email Send: '+info.response);
+    }
+    res.redirect("/");
+  });
+}); 
+
 app.post("/login", authController.login_post);
 app.get("/logout", authController.logout_get);
 
