@@ -10,7 +10,7 @@ module.exports.getPasswordBcrypt=async (password)=> {
 const maxTime = 30000;
 
 module.exports.createToken = (data) => {
-    return jwt.sign(data, "efe", {
+    return jwt.sign(data, process.env.TOKEN_LOGIN_KEY, {
         expiresIn: maxTime,
     });
 };

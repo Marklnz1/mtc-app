@@ -7,10 +7,9 @@ module.exports.vehicle_create = async (req, res, next) => {
     const academyId = res.locals.user.academyId;
     const { make, model, plate, description, type } = req.body ?? {};
     req.body = { make, model, plate, description, type };
-
     validateMakeModelDescription("Marca", make);
     validateMakeModelDescription("Modelo", model);
-    validateMakeModelDescription("Descripción", description);
+    validateMakeModelDescription("Descripción", description,true);
     validateType(type);
     await validatePlate(plate, null, academyId);
   } catch (error) {
@@ -29,7 +28,7 @@ module.exports.vehicle_update = async (req, res, next) => {
     res.locals.vehicle = vehicle;
     validateMakeModelDescription("Marca", make);
     validateMakeModelDescription("Modelo", model);
-    validateMakeModelDescription("Descripción", description);
+    validateMakeModelDescription("Descripción", description,true);
     validateType(type);
     await validatePlate(plate, null, academyId);
   } catch (error) {
@@ -79,11 +78,11 @@ function validateType(type) {
     throw new Error("El tipo de Vehiculo es invalido");
   }
 }
-function validateMakeModelDescription(field, value) {
-  if (typeof value !== "string" || validator.isEmpty(value)) {
+function validateMakeModelDescription(field, value,withNull) {
+  if (typeof value !== "string" || (!withNull&&validator.isEmpty(value))) {
     throw new Error(field + " : Es invalido");
   }
-  if (!validator.isLength(value, { min: 1, max: 40 })) {
+  if (!validator.isLength(value, { min: 0, max: 40 })) {
     throw new Error(field + " : Se acepta un maximo de 40 letras");
   }
 }

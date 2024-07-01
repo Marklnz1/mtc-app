@@ -2,6 +2,12 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const passport = require('passport');
+const session = require('express-session');
+const util = require("util");
+
+require('./utils/google_auth');
+
 const cookieParser = require("cookie-parser");
 const authController = require("./controllers/authController");
 const adminController = require("./controllers/adminController");
@@ -22,7 +28,9 @@ const PORT = process.env.PORT;
 //   useNewUrlParser: true,
 //   useUnifiedTopology: true,
 // });
-
+function isLoggedIn(req,res,next){
+  req.user?next():res.sendStatus(401);
+}
 app.listen(PORT);
 app.use(express.static("public"));
 app.use(express.json());
@@ -32,7 +40,34 @@ app.set("view engine", "ejs");
 app.set("view engine", "html");
 app.engine("html", require("ejs").renderFile);
 
+
+app.use(session({
+  secret:'secret',
+  resave:false,
+  saveUninitialized:true,
+  cookie:{secure:true}
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use("*", extractUser);
+
+app.get('/auth/google',
+  passport.authenticate('google', { scope:
+      [ 'email', 'profile' ] }
+));
+
+app.get( '/auth/google/callback',
+    passport.authenticate( 'google', {
+        successRedirect: '/',
+        failureRedirect: '/'
+}));
+// app.get('/auth/google/failure',isLoggedIn,(req,res)=>{
+//   res.send('aaaaaaaaaaa :V!');
+// });
+// app.get('/auth/google/success',isLoggedIn,(req,res)=>{
+//   res.send('hello there!'+util.inspect(req.user));
+// });
 
 app.get("/", (req, res, next) => {
   let user = res.locals.user;
@@ -57,25 +92,25 @@ app.get("/logout", authController.logout_get);
 
 app.post(
   "/admin/academy/create",
-  authController.verifyUser,
+  authController.verifyAdmin,
   adminController.create_academy
 );
 app.post(
   "/admin/user/create",
-  authController.verifyUser,
+  authController.verifyAdmin,
   adminController.create_academy_user
 );
 app.post(
   "/admin/user/remove",
-  authController.verifyUser,
+  authController.verifyAdmin,
   adminController.remove_academy_user
 );
 app.get(
   "/admin/academy/list",
-  authController.verifyUser,
+  authController.verifyAdmin,
   adminController.list_academy
 );
-app.post("/admin/academy", adminController.get_academy);
+app.post("/admin/academy", authController.verifyAdmin, adminController.get_academy);
 
 app.post(
   "/vehicle/create",

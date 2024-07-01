@@ -11,7 +11,14 @@ const bcrypt = require("bcrypt");
 //   // console.log("Se logeo el usuario : ", req.body);
 // };
 module.exports.verifyUser = async (req, res, next) => {
-  if (!res.locals.user.username) {
+  if (res.locals.user.role!="academy") {
+    res.status(404).json({ error: "404" });
+  } else {
+    next();
+  }
+};
+module.exports.verifyAdmin = async (req, res, next) => {
+  if (res.locals.user.role!="admin") {
     res.status(404).json({ error: "404" });
   } else {
     next();
@@ -44,6 +51,8 @@ module.exports.logout_get = (req, res, next) => {
   if (res.locals.user) {
     res.cookie("jwt", "", { maxAge: 1 });
     res.redirect("/");
+    req.logout((err)=>{
+    });
   } else {
     res.redirect("/");
   }

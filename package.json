@@ -14,11 +14,14 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.6",
     "express": "^4.19.2",
+    "express-session": "^1.18.0",
     "faker": "^5.5.3",
     "jsonwebtoken": "^9.0.2",
     "lorem-ipsum": "^2.0.4",
     "mongoose": "^8.4.1",
     "node-fetch": "^3.1.0",
+    "passport": "^0.7.0",
+    "passport-google-oauth2": "^0.2.0",
     "validator": "^13.12.0"
   }
 }

@@ -4,6 +4,7 @@ const mongodb = require('../utils/mongodb');
 const Schema = mongoose.Schema;
 
 const academySchema = new Schema({
+    gid:String,
     name:String,
     description:String,
     createdAt: { type: Date, default: Date.now },
