@@ -3,7 +3,8 @@ const express = require("express");
 const app = express();
 require("dotenv").config();
 const passport = require('passport');
-const session = require('express-session');
+// const session = require('express-session');
+const session = require('cookie-session');
 const util = require("util");
 
 require('./utils/google_auth');
